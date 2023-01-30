@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "Tutor Resource Management",
-    "version": "0.0.0"
+    "version": "../package.json"
   },
   "tauri": {
     "allowlist": {
@@ -62,7 +62,7 @@
     },
     "updater": {
       "active": true,
-      "endpoints": ["https://releases.mrmelon54.com/{{target}}.json"],
+      "endpoints": ["https://releases.mrmelon54.com/tutor-resource-management.json"],
       "dialog": true,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IERBODREOEJBRUVGRTYyMjUKUldRbFl2N3V1dGlFMnJSeWx5Z2tOMzJMTTRHZFZ1T20xYmxOS1NQcUxVdUsvcDNIY29odUFYY1IK"
     },
