@@ -8,6 +8,7 @@
   import CalendarIcon from "~/icons/Calendar.svelte";
   import LibraryIcon from "~/icons/Library.svelte";
   import LibraryPage from "~/pages/Library.svelte";
+  import TimetablePage from "./pages/Timetable.svelte";
 
   listen("tauri://file-drop", event => {
     console.log(event);
@@ -20,7 +21,7 @@
   let selectedTab = "cal";
 
   const tabItems = [
-    {key: "cal", name: "Timetable", icon: CalendarIcon, content: CalendarIcon},
+    {key: "cal", name: "Timetable", icon: CalendarIcon, content: TimetablePage},
     {key: "stu", name: "Students", icon: UsersIcon, content: UsersIcon},
     {key: "lib", name: "Library", icon: LibraryIcon, content: LibraryPage},
   ];
