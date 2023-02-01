@@ -10,7 +10,8 @@ Version: ${app.version}
 Tauri: ${app.tauriVersion}
 ID: ${app.appId}
 Copyright: ${app.copyright}
-
+Config: ${app.configDir}
+Data: ${app.dataDir}
 `,
     { title: app.name, type: "info" }
   );

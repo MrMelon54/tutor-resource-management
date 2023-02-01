@@ -26,6 +26,9 @@
       "process": {
         "all": true
       },
+      "path": {
+        "all": true
+      },
       "dialog": {
         "all": true
       }
