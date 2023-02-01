@@ -1,11 +1,35 @@
 <script lang="ts">
   let startWithSunday: boolean = false;
+  let onlyOneWeek: boolean = false;
   let d: Date = new Date();
   let month: number = d.getMonth();
   let year: number = d.getFullYear();
-  $: cal = createCalendar(new Date(year, month, 1), startWithSunday);
+  $: cal = createCalendar(new Date(year, month, onlyOneWeek ? d.getDate() : 1), startWithSunday, onlyOneWeek);
 
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  let dynamicEvents: DynamicEvent[] = [
+    {id: 0, startDate: new Date(2023, 1, 1, 9, 0, 0), duration: 7200, repeatWeeks: 0, user: 0},
+    {id: 1, startDate: new Date(2023, 1, 1, 11, 0, 0), duration: 3600, repeatWeeks: 4, user: 1},
+    {id: 2, startDate: new Date(2023, 1, 2, 11, 0, 0), duration: 7200, repeatWeeks: 0, user: 0},
+    {id: 3, startDate: new Date(2023, 1, 2, 9, 0, 0), duration: 3600, repeatWeeks: 0, user: 2},
+    {id: 4, startDate: new Date(2023, 1, 1, 12, 0, 0), duration: 3600, repeatWeeks: 4, user: 2},
+    {id: 5, startDate: new Date(2023, 1, 1, 13, 0, 0), duration: 3600, repeatWeeks: 4, user: 2},
+    {id: 6, startDate: new Date(2023, 1, 1, 14, 0, 0), duration: 3600, repeatWeeks: 4, user: 2},
+  ];
+  let users = [
+    {id: 0, name: "Dave"},
+    {id: 1, name: "Millie"},
+    {id: 2, name: "Amanda"},
+  ];
+
+  interface DynamicEvent {
+    id: number;
+    startDate: Date;
+    duration: number;
+    repeatWeeks: number;
+    user: number;
+  }
 
   interface CalData {
     startOfView: Date;
@@ -16,10 +40,10 @@
     id: number;
     date: Date;
     sameMonth: boolean;
-    events: Event[];
+    events: DynamicEvent[];
   }
 
-  function createCalendar(d: Date, startWithSunday: boolean): CalData {
+  function createCalendar(d: Date, startWithSunday: boolean, onlyOneWeek: boolean): CalData {
     let m = d.getMonth();
     let offsetDay = d.getDay();
     if (!startWithSunday) {
@@ -28,19 +52,43 @@
     }
 
     let startOfView = new Date(d.getFullYear(), d.getMonth(), d.getDate() - offsetDay);
-    let cells = Array.from({length: 6 * 7}, (_, id): CalCell => {
-      let nd = new Date(startOfView.getFullYear(), startOfView.getMonth(), startOfView.getDate() + id);
+    let cells = Array.from({length: (onlyOneWeek ? 1 : 6) * 7}, (_, id): CalCell => {
+      let date = new Date(startOfView.getFullYear(), startOfView.getMonth(), startOfView.getDate() + id);
+      let events = dynamicEvents
+        .filter(x => {
+          if (date.getDay() != x.startDate.getDay()) return false;
+          return getDate(x.startDate) <= date && (x.repeatWeeks == 0 || addDate(x.startDate, 7 * x.repeatWeeks) > date);
+        })
+        .sort((a, b) => timeSec(a.startDate) - timeSec(b.startDate));
       return {
         id,
-        date: nd,
-        sameMonth: nd.getMonth() == m,
-        events: [],
+        date,
+        sameMonth: date.getMonth() == m,
+        events,
       };
     });
     return {
       startOfView,
       cells,
     };
+  }
+
+  function addDate(date: Date, days: number) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+  }
+
+  function getDate(date: Date) {
+    return addDate(date, 0);
+  }
+
+  function timeSec(date: Date) {
+    return date.getTime();
+  }
+
+  function timeStr(date: Date) {
+    let hrs = date.getHours();
+    let min = date.getMinutes();
+    return `${hrs}:${min < 10 ? "0" + min : min}${hrs < 12 ? "am" : "pm"}`;
   }
 </script>
 
@@ -67,24 +115,28 @@
       <th>Sun<span>day</span></th>
     {/if}
   </tr>
-  {#each [0, 1, 2, 3, 4, 5] as row (row)}
+  {#each onlyOneWeek ? [0] : [0, 1, 2, 3, 4, 5] as row (row)}
     <tr>
       {#each [0, 1, 2, 3, 4, 5, 6] as col (col)}
         {@const cell = cal.cells[row * 7 + col]}
-        <td class={cell.sameMonth ? "" : "extra-day"} data-DoM={cell.date.getDate()}> Some day data</td>
+        <td class={cell.sameMonth ? "" : "extra-day"} data-DoM={cell.date.getDate()}>
+          {#each cell.events as e (e.id)}
+            <div>{timeStr(e.startDate)} {users[e.user].name}</div>
+          {/each}
+        </td>
       {/each}
     </tr>
   {/each}
 </table>
 
 <button style="position:absolute;top:50px;" on:click={() => (startWithSunday = !startWithSunday)}>Toggle startWithSunday: {startWithSunday}</button>
+<button style="position:absolute;top:50px;left:250px;" on:click={() => (onlyOneWeek = !onlyOneWeek)}>Toggle onlyOneWeek: {onlyOneWeek}</button>
 
 <style lang="scss">
   table {
     table-layout: fixed;
     border-collapse: collapse;
     width: 100%;
-    height: 100%;
 
     tr {
       + tr {
@@ -119,6 +171,15 @@
 
     td {
       position: relative;
+      padding-top: 20px;
+      vertical-align: top;
+
+      div {
+        line-height: normal;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
 
       &::before {
         content: attr(data-DoM);

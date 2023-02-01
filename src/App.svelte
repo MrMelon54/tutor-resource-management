@@ -63,7 +63,7 @@
     grid-template-areas: "header header" "tabs content";
     grid-template-columns: 48px auto;
     grid-template-rows: 48px auto;
-    min-height: 100vh;
+    height: 100vh;
 
     > header {
       display: flex;
@@ -135,6 +135,8 @@
 
     > main.content {
       grid-area: content;
+      overflow-y: auto;
+      height: 100%;
     }
   }
 </style>
