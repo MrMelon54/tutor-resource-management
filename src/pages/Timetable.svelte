@@ -1,4 +1,8 @@
 <script lang="ts">
+  import {createEventDispatcher} from "svelte";
+  import {addDate, dateTimeMerge, getDate, monthNames, timeSec, timeStr} from "~/utils/date-format";
+  import type {CalCell, CalData, DynamicEvent, Student} from "~/utils/interfaces";
+
   let startWithSunday: boolean = false;
   let onlyOneWeek: boolean = false;
   let d: Date = new Date();
@@ -6,7 +10,7 @@
   let year: number = d.getFullYear();
   $: cal = createCalendar(new Date(year, month, onlyOneWeek ? d.getDate() : 1), startWithSunday, onlyOneWeek);
 
-  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  let dispatch = createEventDispatcher();
 
   let dynamicEvents: DynamicEvent[] = [
     {id: 0, startDate: new Date(2023, 1, 1, 9, 0, 0), duration: 7200, repeatWeeks: 0, user: 0},
@@ -17,31 +21,11 @@
     {id: 5, startDate: new Date(2023, 1, 1, 13, 0, 0), duration: 3600, repeatWeeks: 4, user: 2},
     {id: 6, startDate: new Date(2023, 1, 1, 14, 0, 0), duration: 3600, repeatWeeks: 4, user: 2},
   ];
-  let users = [
+  let users: Student[] = [
     {id: 0, name: "Dave"},
     {id: 1, name: "Millie"},
     {id: 2, name: "Amanda"},
   ];
-
-  interface DynamicEvent {
-    id: number;
-    startDate: Date;
-    duration: number;
-    repeatWeeks: number;
-    user: number;
-  }
-
-  interface CalData {
-    startOfView: Date;
-    cells: CalCell[];
-  }
-
-  interface CalCell {
-    id: number;
-    date: Date;
-    sameMonth: boolean;
-    events: DynamicEvent[];
-  }
 
   function createCalendar(d: Date, startWithSunday: boolean, onlyOneWeek: boolean): CalData {
     let m = d.getMonth();
@@ -71,24 +55,6 @@
       startOfView,
       cells,
     };
-  }
-
-  function addDate(date: Date, days: number) {
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
-  }
-
-  function getDate(date: Date) {
-    return addDate(date, 0);
-  }
-
-  function timeSec(date: Date) {
-    return date.getTime();
-  }
-
-  function timeStr(date: Date) {
-    let hrs = date.getHours();
-    let min = date.getMinutes();
-    return `${hrs}:${min < 10 ? "0" + min : min}${hrs < 12 ? "am" : "pm"}`;
   }
 </script>
 
@@ -120,9 +86,13 @@
       {#each [0, 1, 2, 3, 4, 5, 6] as col (col)}
         {@const cell = cal.cells[row * 7 + col]}
         <td class={cell.sameMonth ? "" : "extra-day"} data-DoM={cell.date.getDate()}>
-          {#each cell.events as e (e.id)}
-            <div>{timeStr(e.startDate)} {users[e.user].name}</div>
-          {/each}
+          <div class="wrapper">
+            {#each cell.events as e (e.id)}
+              <button class="pill" on:click={() => dispatch("openLesson", {event: e, date: dateTimeMerge(cell.date, e.startDate)})}>
+                <span>{timeStr(e.startDate)} {users[e.user].name}</span>
+              </button>
+            {/each}
+          </div>
         </td>
       {/each}
     </tr>
@@ -174,11 +144,27 @@
       padding-top: 20px;
       vertical-align: top;
 
-      div {
-        line-height: normal;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
+      div.wrapper {
+        display: flex;
+        flex-direction: column;
+        margin: 2px;
+        gap: 2px;
+
+        button.pill {
+          font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+          font-size: 14px;
+          font-weight: 500;
+          text-align: left;
+          line-height: normal;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+          color: var(--primary-text);
+          background-color: var(--primary);
+          border-radius: 4px;
+          padding: 2px 4px;
+          cursor: pointer;
+        }
       }
 
       &::before {

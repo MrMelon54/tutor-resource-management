@@ -8,27 +8,28 @@
   import CalendarIcon from "~/icons/Calendar.svelte";
   import LibraryIcon from "~/icons/Library.svelte";
   import LibraryPage from "~/pages/Library.svelte";
-  import TimetablePage from "./pages/Timetable.svelte";
+  import TimetablePage from "~/pages/Timetable.svelte";
+  import FilesIcon from "~/icons/Files.svelte";
+  import LessonPage from "~/pages/Lesson.svelte";
+  import StudentsPage from "~/pages/Students.svelte";
+  import type {Lesson} from "~/utils/interfaces";
 
   listen("tauri://file-drop", event => {
     console.log(event);
   });
 
   function toggleTheme() {
-    theme.update(value => (value == "dark" ? "auto" : "dark"));
+    theme.update(value => (value == "dark" ? "light" : "dark"));
   }
 
-  let selectedTab = "cal";
+  let lesson: Lesson;
 
+  let selectedTab = "timetable";
   const tabItems = [
-    {key: "cal", name: "Timetable", icon: CalendarIcon, content: TimetablePage},
-    {key: "stu", name: "Students", icon: UsersIcon, content: UsersIcon},
-    {key: "lib", name: "Library", icon: LibraryIcon, content: LibraryPage},
+    {key: "timetable", name: "Timetable", icon: CalendarIcon},
+    {key: "student", name: "Students", icon: UsersIcon},
+    {key: "library", name: "Library", icon: LibraryIcon},
   ];
-  const tabMap = {};
-  tabItems.forEach(x => {
-    tabMap[x.key] = x;
-  });
 </script>
 
 <main class="container">
@@ -46,6 +47,11 @@
     </button>
   </header>
   <nav class="main-tabs">
+    {#if lesson}
+      <button class="tab {selectedTab == 'lesson' ? 'active' : ''}" on:click={() => (selectedTab = "lesson")}>
+        <FilesIcon />
+      </button>
+    {/if}
     {#each tabItems as tab (tab.key)}
       <button class="tab {selectedTab == tab.key ? 'active' : ''}" on:click={() => (selectedTab = tab.key)}>
         <svelte:component this={tab.icon} />
@@ -53,7 +59,17 @@
     {/each}
   </nav>
   <main class="content">
-    <svelte:component this={tabMap[selectedTab].content} />
+    {#if selectedTab == "lesson"}
+      <LessonPage {lesson} />
+    {:else if selectedTab == "timetable"}
+      <TimetablePage on:openLesson={x => ((lesson = x.detail), (selectedTab = "lesson"))} />
+    {:else if selectedTab == "student"}
+      <StudentsPage />
+    {:else if selectedTab == "library"}
+      <LibraryPage />
+    {:else}
+      <div>404 Not Found</div>
+    {/if}
   </main>
 </main>
 

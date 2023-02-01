@@ -1,13 +1,13 @@
-import { writable } from "svelte/store";
+import {writable} from "svelte/store";
 
-export const theme = writable<"auto" | "light" | "dark">(
+export const theme = writable<"light" | "dark">(
   (() => {
     try {
-      return localStorage.getItem("theme") as "auto" | "light" | "dark";
+      return localStorage.getItem("theme") as "light" | "dark";
     } catch (_) {
-      return "auto";
+      return "dark";
     }
-  })()
+  })(),
 );
 
-theme.subscribe((value) => localStorage.setItem("theme", value));
+theme.subscribe(value => localStorage.setItem("theme", value));
