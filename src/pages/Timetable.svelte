@@ -2,32 +2,21 @@
   import {createEventDispatcher} from "svelte";
   import {addDate, dateTimeMerge, getDate, monthNames, timeSec, timeStr} from "~/utils/date-format";
   import type {CalCell, CalData, DynamicEvent, Student} from "~/utils/interfaces";
+  import {dynamicEvents, students} from "~/stores/timetable";
 
   let startWithSunday: boolean = false;
   let onlyOneWeek: boolean = false;
   let d: Date = new Date();
   let month: number = d.getMonth();
   let year: number = d.getFullYear();
-  $: cal = createCalendar(new Date(year, month, onlyOneWeek ? d.getDate() : 1), startWithSunday, onlyOneWeek);
+  $: cal = createCalendar(new Date(year, month, onlyOneWeek ? d.getDate() : 1), startWithSunday, onlyOneWeek, $dynamicEvents, $students);
 
+  dynamicEvents.subscribe(v => {
+    console.info(v);
+  });
   let dispatch = createEventDispatcher();
 
-  let dynamicEvents: DynamicEvent[] = [
-    {id: 0, startDate: new Date(2023, 1, 1, 9, 0, 0), duration: 7200, repeatWeeks: 0, user: 0},
-    {id: 1, startDate: new Date(2023, 1, 1, 11, 0, 0), duration: 3600, repeatWeeks: 4, user: 1},
-    {id: 2, startDate: new Date(2023, 1, 2, 11, 0, 0), duration: 7200, repeatWeeks: 0, user: 0},
-    {id: 3, startDate: new Date(2023, 1, 2, 9, 0, 0), duration: 3600, repeatWeeks: 0, user: 2},
-    {id: 4, startDate: new Date(2023, 1, 1, 12, 0, 0), duration: 3600, repeatWeeks: 4, user: 2},
-    {id: 5, startDate: new Date(2023, 1, 1, 13, 0, 0), duration: 3600, repeatWeeks: 4, user: 2},
-    {id: 6, startDate: new Date(2023, 1, 1, 14, 0, 0), duration: 3600, repeatWeeks: 4, user: 2},
-  ];
-  let users: Student[] = [
-    {id: 0, name: "Dave"},
-    {id: 1, name: "Millie"},
-    {id: 2, name: "Amanda"},
-  ];
-
-  function createCalendar(d: Date, startWithSunday: boolean, onlyOneWeek: boolean): CalData {
+  function createCalendar(d: Date, startWithSunday: boolean, onlyOneWeek: boolean, dynamicEvents: DynamicEvent[], _: Student[]): CalData {
     let m = d.getMonth();
     let offsetDay = d.getDay();
     if (!startWithSunday) {
@@ -89,7 +78,7 @@
           <div class="wrapper">
             {#each cell.events as e (e.id)}
               <button class="pill" on:click={() => dispatch("openLesson", {event: e, date: dateTimeMerge(cell.date, e.startDate)})}>
-                <span>{timeStr(e.startDate)} {users[e.user].name}</span>
+                <span>{timeStr(e.startDate)} {$students[e.user] ? $students[e.user].name : "Unknown"}</span>
               </button>
             {/each}
           </div>

@@ -1,26 +1,41 @@
-import {writable} from "svelte/store";
+import {writeTextFile, renameFile, BaseDirectory, readTextFile, createDir} from "@tauri-apps/api/fs";
+import {writable, type Writable} from "svelte/store";
 import type {DynamicEvent, Student} from "~/utils/interfaces";
+import {dateTimeReviver} from "~/utils/date-time-reviver";
 
-export const dynamicEvents = writable<DynamicEvent[]>(
-  (() => {
-    try {
-      return console.error("Code load dynamic events"), [];
-    } catch (_) {
-      return [];
-    }
-  })(),
-);
+function createAsyncWritable<T>(value: T, call: Promise<T>): Writable<T> {
+  value.__NO_VALUE__ = true;
+  let w = writable<T>(value);
+  call.then(v => w.set(v));
+  return w;
+}
 
-dynamicEvents.subscribe(value => console.error("Code save dynamic events:", value));
+function createConfigWritable<T>(value: T, name: string): Writable<T> {
+  let w = createAsyncWritable(
+    value,
+    (async () => {
+      let f = await readTextFile(name, {dir: BaseDirectory.AppConfig});
+      return JSON.parse(f, dateTimeReviver) as T;
+    })(),
+  );
+  w.subscribe(value => {
+    if (value.__NO_VALUE__) return;
+    (async () => {
+      await createDir("", {
+        dir: BaseDirectory.AppConfig,
+        recursive: true,
+      });
+      try {
+        await renameFile(name, name + "-old", {dir: BaseDirectory.AppConfig});
+      } catch (_) {}
+      await writeTextFile(name, JSON.stringify(value), {dir: BaseDirectory.AppConfig});
+    })();
+  });
+  return w;
+}
 
-export const students = writable<Student[]>(
-  (() => {
-    try {
-      return console.error("Code load students"), [];
-    } catch (_) {
-      return [];
-    }
-  })(),
-);
+export const dynamicEvents = createConfigWritable<DynamicEvent[]>([], "dynamic-events.json");
 
-students.subscribe(value => console.error("Code save students:", value));
+export const students = createConfigWritable<Student[]>([], "students.json");
+
+window.aaaa = [dynamicEvents, students];
