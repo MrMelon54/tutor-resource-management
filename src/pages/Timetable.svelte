@@ -2,7 +2,7 @@
   import {createEventDispatcher} from "svelte";
   import {addDate, dateTimeMerge, getDate, monthNames, timeSec, timeStr} from "~/utils/date-format";
   import type {CalCell, CalData, DynamicEvent, Student} from "~/utils/interfaces";
-  import {dynamicEvents, students} from "~/stores/timetable";
+  import {dynamicEvents, students} from "~/stores/main";
 
   let startWithSunday: boolean = false;
   let onlyOneWeek: boolean = false;
@@ -11,9 +11,6 @@
   let year: number = d.getFullYear();
   $: cal = createCalendar(new Date(year, month, onlyOneWeek ? d.getDate() : 1), startWithSunday, onlyOneWeek, $dynamicEvents, $students);
 
-  dynamicEvents.subscribe(v => {
-    console.info(v);
-  });
   let dispatch = createEventDispatcher();
 
   function createCalendar(d: Date, startWithSunday: boolean, onlyOneWeek: boolean, dynamicEvents: DynamicEvent[], _: Student[]): CalData {

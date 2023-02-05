@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {students} from "~/stores/main";
   import {formatForLessonView} from "~/utils/date-format";
   import type {Lesson} from "~/utils/interfaces";
 
@@ -7,4 +8,4 @@
 </script>
 
 <h1>{formatForLessonView(lesson.date)}</h1>
-<h2>{lesson.event.user}</h2>
+<h2>{$students[lesson.event.user].name}</h2>

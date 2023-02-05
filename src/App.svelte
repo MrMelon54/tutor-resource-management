@@ -1,5 +1,4 @@
 <script lang="ts">
-  import {listen} from "@tauri-apps/api/event";
   import {openAbout} from "~/utils/about-dialog";
   import {theme} from "~/stores/theme";
   import MoonIcon from "~/icons/Moon.svelte";
@@ -13,10 +12,6 @@
   import LessonPage from "~/pages/Lesson.svelte";
   import StudentsPage from "~/pages/Students.svelte";
   import type {Lesson} from "~/utils/interfaces";
-
-  listen("tauri://file-drop", event => {
-    console.log(event);
-  });
 
   function toggleTheme() {
     theme.update(value => (value == "dark" ? "light" : "dark"));

@@ -76,7 +76,15 @@
         "height": 600,
         "resizable": true,
         "title": "Tutor Resource Management",
-        "width": 800
+        "width": 800,
+        "visible": false
+      },
+      {
+        "width": 400,
+        "height": 400,
+        "decorations": false,
+        "url": "splashscreen.html",
+        "label": "splashscreen"
       }
     ]
   }

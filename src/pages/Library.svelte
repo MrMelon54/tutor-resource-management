@@ -1,28 +1,23 @@
 <script lang="ts">
-  const categories = [
-    {key: "maths", name: "Maths"},
-    {key: "english", name: "English"},
-    {key: "a", name: "A"},
-    {key: "b", name: "B"},
-    {key: "c", name: "C"},
-    {key: "d", name: "D"},
-    {key: "e", name: "E"},
-    {key: "f", name: "F"},
-    {key: "g", name: "G"},
-    {key: "h", name: "H"},
-    {key: "i", name: "I"},
-    {key: "j", name: "J"},
-    {key: "k", name: "K"},
-    {key: "l", name: "L"},
-    {key: "m", name: "M"},
-    {key: "n", name: "N"},
-    {key: "o", name: "O"},
-    {key: "p", name: "P"},
-  ];
+  import {listen} from "@tauri-apps/api/event";
+  import {invoke} from "@tauri-apps/api/tauri";
+  import {BaseDirectory, createDir} from "@tauri-apps/api/fs";
+  import {libraryCategories} from "~/stores/main";
+
+  listen("tauri://file-drop", event => {
+    (event.payload as string[]).forEach(element => {
+      importFileToLibrary(element);
+    });
+  });
+
+  async function importFileToLibrary(name: string) {
+    console.log("Importing file:", name);
+    console.log(await invoke("import_file_to_library", {name}));
+  }
 </script>
 
 <div class="category-cards">
-  {#each categories as category (category.key)}
+  {#each $libraryCategories as category (category.id)}
     <div class="card">{category.name}</div>
   {/each}
 </div>
