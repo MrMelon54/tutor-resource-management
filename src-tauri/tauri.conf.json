@@ -20,14 +20,7 @@
         "all": false,
         "open": true
       },
-      "fs": {
-        "scope": ["$APPCONFIG", "$APPCONFIG/*"],
-        "all": true
-      },
       "process": {
-        "all": true
-      },
-      "path": {
         "all": true
       },
       "dialog": {

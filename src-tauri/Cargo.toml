@@ -16,11 +16,13 @@ tauri-build = { version = "1.2.1", features = [] }
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.2.4", features = ["app-all", "dialog-all", "fs-all", "path-all", "process-all", "shell-open", "updater"] }
+tauri = { version = "1.2.4", features = ["app-all", "dialog-all", "process-all", "shell-open", "updater"] }
 sha2 = { version = "0.10.6" }
 thiserror = { version = "1.0.38" }
-sqlite = { version = "0.30.3" }
 glob = { version = "0.3.1" }
+r2d2_sqlite = "0.21.0"
+r2d2 = "0.8.8"
+time = { version = "0.3.17", features = ["serde"] }
 
 [features]
 # by default Tauri runs in production mode

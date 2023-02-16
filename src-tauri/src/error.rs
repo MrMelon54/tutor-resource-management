@@ -11,6 +11,12 @@ pub enum Error {
 
     #[error(transparent)]
     Serde(#[from] serde_json::Error),
+
+    #[error(transparent)]
+    R2d2(#[from] r2d2::Error),
+
+    #[error(transparent)]
+    R2d2RustqliteSqlite(#[from] r2d2_sqlite::rusqlite::Error),
 }
 
 // we must manually implement serde::Serialize
@@ -24,11 +30,13 @@ impl serde::Serialize for Error {
 }
 
 #[derive(Debug, Clone)]
-pub struct FakeError;
+pub struct FakeError {
+    pub message: String,
+}
 
 impl fmt::Display for FakeError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "this is a fake error")
+        write!(f, "this is a fake error: {}", self.message)
     }
 }
 
